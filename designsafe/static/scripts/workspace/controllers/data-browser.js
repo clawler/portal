@@ -64,7 +64,7 @@ function DataBrowserCtrl($scope, $controller, $rootScope, Systems, logger, DataB
         }
         $scope.data.loadingMore = true;
         if ($scope.data.filesListing && $scope.data.filesListing.children &&
-            $scope.data.filesListing.children.length < 95) {
+            $scope.data.filesListing.children.length < 100 * ($scope.data.page + 1)) {
             $scope.data.reachedEnd = true;
             return;
         }
@@ -77,11 +77,11 @@ function DataBrowserCtrl($scope, $controller, $rootScope, Systems, logger, DataB
                 page: $scope.data.page,
             })
             .then(function(listing) {
-                $scope.data.filesListing = listing;
+                $scope.data.loadingMore = false;
+                $scope.data.filesListing.concat(listing);
                 $scope.data.filePath = $scope.data.filesListing.path;
                 $scope.data.dirPath = $scope.data.filePath.split('/');
-                $scope.data.loadingMore = false;
-                if (listing.children.length < 95) {
+                if (listing.children.length < 100 * ($scope.data.page + 1)) {
                     $scope.data.reachedEnd = true;
                 }
                 $scope.data.loading = false;
@@ -165,7 +165,7 @@ function DataBrowserCtrl($scope, $controller, $rootScope, Systems, logger, DataB
                 } else {
                     $scope.data.dirPath = $scope.data.filePath.split('/');
                 }
-                $scope.browser.listing = $scope.data.filesListing;
+                $scope.browser.listing += $scope.data.filesListing;
                 $scope.data.loading = false;
             }, function(error) {
                 logger.log(error);

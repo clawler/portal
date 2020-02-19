@@ -21,54 +21,94 @@
            tooltip-append-to-body="true"><i class="fa fa-info-circle"></i> More info</a>
     </p>
     <div class="files-listing">
-        <div class="table-responsive ds-table-display-wrapper"
-             ds-infinite-scroll
-             data-scroll-bottom="scrollToBottom()"
-             data-scroll-top="scrollToTop()"
-             data-bottom-height="0">
+        <div class="table-responsive ds-table-display-wrapper" 
+            ds-infinite-scroll 
+            data-scroll-bottom="scrollToBottom()"
+            data-scroll-top="scrollToTop()" 
+            data-bottom-height="0">
             <table class="table table-striped">
                 <caption style="white-space:nowrap">
                     <label>Browsing:</label><br>
-                    <span
-                      ng-repeat-start="dirElem in data.dirPath track by $index"
-                      class="text text-info">
-                        <a href="#"
-                           ng-if="dirElem != '/' "
-                           ng-click="browseTrail($event, $index)">{{dirElem}}</a>
+                    <span 
+                        ng-repeat-start="dirElem in data.dirPath track by $index" 
+                        class="text text-info">
+                        <a href="#" 
+                            ng-if="dirElem != '/' " 
+                            ng-click="browseTrail($event, $index)">{{dirElem}}</a>
                         <a ng-if="(dirElem == '/' || dirElem == '') && data.system.id != 'designsafe.storage.default' && $first"
                             ng-click="browseTrail($event, $index)">{{data.system.name}}</a>
-                     </span>
-                     <span ng-if="data.system.id != 'designsafe.storage.default' && $first">/</span>
-                      <span ng-repeat-end
-                            ng-if="!$last && !$first">/</span>
+                    </span>
+                    <span ng-if="data.system.id != 'designsafe.storage.default' && $first">/</span>
+                    <span 
+                        ng-repeat-end 
+                        ng-if="!$last && !$first">/</span>
                 </caption>
                 <thead>
-                <th>File name</th>
-                <th>Size</th>
+                    <!-- Non-publication headers -->
+                    <th ng-if="data.system.id !== 'nees.public' && data.system.id !== 'designsafe.storage.published'">File name</th>
+                    <th ng-if="data.system.id !== 'nees.public' && data.system.id !== 'designsafe.storage.published'">Size</th>
+                    <!-- Publication headers -->
+                    <th ng-if="data.system.id === 'nees.public' || data.system.id === 'designsafe.storage.published'">Project ID</th>
+                    <th ng-if="data.system.id === 'nees.public' || data.system.id === 'designsafe.storage.published'">Title</th>
                 </thead>
                 <tbody>
-                <tr ng-repeat="f in data.filesListing.children | orderBy : ['type', 'name']">
-                    <td>
-                        <button ng-if="f.name !== '.' && data.wants"
-                                type="button"
-                                class="btn btn-xs btn-info"
-                                ng-click="chooseFile(f)">Select</button>
-                        <a ng-click="browseFile(f)" class="btn btn-xs btn-link" ds-data-draggable data-ds-data="agave://{{f.system}}/{{f.path}}">
-                            <i class="fa {{f.icon()}}"></i>
-                            <span>{{renderName(f)}}</span>
-                        </a>
-                    </td>
-                    <td>{{f.length|bytes:0}}</td>
+                    <!-- Publication file browser -->
+                    <tr ng-if="data.system.id === 'nees.public' || data.system.id === 'designsafe.storage.published'"
+                        ng-repeat="f in data.filesListing.children">
+                        <td>
+                            <button ng-if="f.name !== '.' && data.wants" 
+                                    type="button" 
+                                    class="btn btn-xs btn-info"
+                                    ng-click="chooseFile(f)">Select</button>
+                            <a ng-click="browseFile(f)"
+                                class="btn btn-xs btn-link" 
+                                ds-data-draggable
+                                data-ds-data="agave://{{f.system}}/{{f.path}}">
+                                <i class="fa {{f.icon()}}"></i>
+                                <span ng-if="f.meta">{{f.meta.projectId}}</span>
+                                <span ng-if="f.metadata">{{f.metadata.project.name}}</span>
+                                <span ng-if="f.trail">{{f.name}}</span>
+                            </a>
+                        </td>
+                        <td ng-if="f.meta">{{f.meta.title}}</td>
+                        <td ng-if="f.metadata">{{f.metadata.project.title}}</td>
+                        <td ng-if="f.trail">{{f.length|bytes:0}}</td>
                 </tr>
-                <tr ng-if="data.loading"><td colspan="3"><p class="lead"><i class="fa fa-spin fa-circle-o-notch"></i> Loading files...</p></td></tr>
-                <tr ng-if="data.error"><td colspan="3"><p class="alert alert-danger">{{data.error}}</p></td></tr>
-                <tr ng-if="data.busyListingPage">
-                  <td>
-                        <span class="bg-info text-info">
-                           <i class="fa fa-spinner fa-spin"></i> Loading...
-                        </span>
-                  </td>
-                </tr>
+                    <!-- Non-publication file browser -->
+                    <tr ng-if="data.system.id !== 'nees.public' && data.system.id !== 'designsafe.storage.published' && f.name.charAt(0) !== '.'" 
+                        ng-repeat="f in data.filesListing.children | orderBy : ['type', '-lastUpdated']">
+                        <td>
+                            <button ng-if="f.name !== '.' && data.wants" 
+                                    type="button" 
+                                    class="btn btn-xs btn-info"
+                                    ng-click="chooseFile(f)">Select</button>
+                            <a  ng-click="browseFile(f)" 
+                                class="btn btn-xs btn-link" 
+                                ds-data-draggable
+                                data-ds-data="agave://{{f.system}}/{{f.path}}">
+                                <i class="fa {{f.icon()}}"></i>
+                                <span>{{renderName(f)}}</span>
+                            </a>
+                        </td>
+                        <td>{{f.length|bytes:0}}</td>
+                    </tr>
+                    <tr ng-if="data.loading">
+                        <td colspan="3">
+                            <p class="lead"><i class="fa fa-spin fa-circle-o-notch"></i> Loading files...</p>
+                        </td>
+                    </tr>
+                    <tr ng-if="data.error">
+                        <td colspan="3">
+                            <p class="alert alert-danger">{{data.error}}</p>
+                        </td>
+                    </tr>
+                    <tr ng-if="data.busyListingPage">
+                        <td>
+                            <span class="bg-info text-info">
+                                <i class="fa fa-spinner fa-spin"></i> Loading...
+                            </span>
+                        </td>
+                    </tr>
                 </tbody>
             </table>
         </div>

@@ -30,8 +30,7 @@
                 <tr ng-if="!$ctrl.browser.busyListing"
               ng-repeat="item in $ctrl.browser.listing.children"
               ng-click="$ctrl.onSelect($event, item)"
-              ng-class="{'ds-data-selected': item._ui.selected}"
-          >
+              ng-class="{'ds-data-selected': item._ui.selected}">
               <td>
                   <a ng-href="{{ item.href }}" ng-click="$ctrl.onBrowse($event, item)">
                       {{ $ctrl.renderName(item) }}
